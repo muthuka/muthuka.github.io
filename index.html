@@ -20,6 +20,7 @@
                 <a href="#about" class="nav-link">About</a>
                 <a href="#projects" class="nav-link">Projects</a>
                 <a href="#stats" class="nav-link">Stats</a>
+                <a href="#github-stats" class="nav-link">GitHub</a>
                 <a href="#contact" class="nav-link">Contact</a>
             </div>
             <div class="nav-toggle" id="navToggle">
@@ -35,10 +36,10 @@
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">
-                    Hi, I'm <span class="highlight">Muthuka</span>
+                    Hi, I'm <span class="highlight">Muthu</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Software Developer & Creative Problem Solver
+                    Tech Leader & Creative Problem Solver
                 </p>
                 <p class="hero-description">
                     Passionate about building innovative solutions and creating meaningful digital experiences.
@@ -182,31 +183,57 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="stat-number" id="repos-count" data-count="0">
+                        <div class="loading-spinner"></div>
+                    </div>
+                    <div class="stat-label">Public Repositories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-number" id="stars-count" data-count="0">
+                        <div class="loading-spinner"></div>
+                    </div>
+                    <div class="stat-label">Total Stars</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="stat-number" id="commits-count" data-count="0">
+                        <div class="loading-spinner"></div>
+                    </div>
+                    <div class="stat-label">Commits This Year</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
                         <i class="fas fa-code"></i>
                     </div>
-                    <div class="stat-number" data-count="50">0</div>
-                    <div class="stat-label">Projects Completed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
+                    <div class="stat-number" id="languages-count" data-count="0">
+                        <div class="loading-spinner"></div>
                     </div>
-                    <div class="stat-number" data-count="25">0</div>
-                    <div class="stat-label">Happy Clients</div>
+                    <div class="stat-label">Languages Used</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-number" data-count="1000">0</div>
-                    <div class="stat-label">Hours Coded</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GitHub Stats Cards Section -->
+    <section id="github-stats" class="github-stats">
+        <div class="container">
+            <h2 class="section-title">GitHub Analytics</h2>
+            <div class="github-stats-grid">
+                <div class="github-card">
+                    <img src="https://github-readme-stats.vercel.app/api?username=muthuka&show_icons=true&theme=dark&hide_border=true&bg_color=2c3e50&title_color=f39c12&text_color=ecf0f1&icon_color=f39c12" alt="Muthuka's GitHub Stats" loading="lazy">
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-trophy"></i>
-                    </div>
-                    <div class="stat-number" data-count="5">0</div>
-                    <div class="stat-label">Awards Won</div>
+                <div class="github-card">
+                    <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=muthuka&theme=dark&hide_border=true&bg_color=2c3e50&title_color=f39c12&text_color=ecf0f1&layout=compact" alt="Top Languages" loading="lazy">
+                </div>
+                <div class="github-card full-width">
+                    <img src="https://github-readme-streak-stats.herokuapp.com/?user=muthuka&theme=dark&hide_border=true&background=2c3e50&stroke=f39c12&ring=f39c12&fire=f39c12&currStreakLabel=ecf0f1&sideLabels=ecf0f1&currStreakNum=ecf0f1&sideNums=ecf0f1&dates=ecf0f1" alt="GitHub Streak" loading="lazy">
                 </div>
             </div>
         </div>
@@ -226,7 +253,7 @@
                     <div class="contact-methods">
                         <div class="contact-method">
                             <i class="fas fa-envelope"></i>
-                            <span>contact@muthuka.dev</span>
+                            <span>muthu.kumar@me.com</span>
                         </div>
                         <div class="contact-method">
                             <i class="fab fa-linkedin"></i>

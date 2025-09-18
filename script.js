@@ -68,7 +68,7 @@ window.addEventListener('scroll', function() {
 
 // Stats Counter Animation
 function animateStats() {
-    const statNumbers = document.querySelectorAll('.stat-number');
+    const statNumbers = document.querySelectorAll('.stat-number.loaded');
     
     statNumbers.forEach(stat => {
         const target = parseInt(stat.getAttribute('data-count'));
@@ -87,22 +87,9 @@ function animateStats() {
     });
 }
 
-// Trigger stats animation when stats section is visible
+// Remove the automatic trigger - we'll call this after data loads
 const statsSection = document.querySelector('.stats');
-const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            animateStats();
-            statsObserver.unobserve(entry.target);
-        }
-    });
-}, {
-    threshold: 0.5
-});
-
-if (statsSection) {
-    statsObserver.observe(statsSection);
-}
+// Note: Animation will now be triggered from loadGitHubStats()
 
 // Fade in animation for sections
 const observerOptions = {
@@ -332,3 +319,177 @@ loadingStyle.textContent = `
     }
 `;
 document.head.appendChild(loadingStyle);
+
+// GitHub API Configuration
+const GITHUB_USERNAME = 'muthuka';
+const GITHUB_API_BASE = 'https://api.github.com';
+
+// Cache configuration
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+const CACHE_KEY_PREFIX = 'github_stats_';
+
+// Cache helper functions
+function getCachedData(key) {
+    try {
+        const cached = localStorage.getItem(CACHE_KEY_PREFIX + key);
+        if (cached) {
+            const data = JSON.parse(cached);
+            if (Date.now() - data.timestamp < CACHE_DURATION) {
+                return data.value;
+            }
+            localStorage.removeItem(CACHE_KEY_PREFIX + key);
+        }
+    } catch (error) {
+        console.warn('Error reading from cache:', error);
+    }
+    return null;
+}
+
+function setCachedData(key, value) {
+    try {
+        const data = {
+            value: value,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(CACHE_KEY_PREFIX + key, JSON.stringify(data));
+    } catch (error) {
+        console.warn('Error writing to cache:', error);
+    }
+}
+
+// GitHub API functions
+async function fetchGitHubUser() {
+    const cacheKey = 'user';
+    const cached = getCachedData(cacheKey);
+    if (cached) return cached;
+
+    try {
+        const response = await fetch(`${GITHUB_API_BASE}/users/${GITHUB_USERNAME}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const userData = await response.json();
+        setCachedData(cacheKey, userData);
+        return userData;
+    } catch (error) {
+        console.error('Error fetching GitHub user:', error);
+        return null;
+    }
+}
+
+async function fetchGitHubRepos() {
+    const cacheKey = 'repos';
+    const cached = getCachedData(cacheKey);
+    if (cached) return cached;
+
+    try {
+        let allRepos = [];
+        let page = 1;
+        const perPage = 100;
+
+        while (true) {
+            const response = await fetch(`${GITHUB_API_BASE}/users/${GITHUB_USERNAME}/repos?page=${page}&per_page=${perPage}&type=public&sort=updated`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const repos = await response.json();
+            
+            if (repos.length === 0) break;
+            allRepos = allRepos.concat(repos);
+            
+            if (repos.length < perPage) break;
+            page++;
+        }
+
+        setCachedData(cacheKey, allRepos);
+        return allRepos;
+    } catch (error) {
+        console.error('Error fetching GitHub repos:', error);
+        return [];
+    }
+}
+
+async function fetchGitHubStats() {
+    try {
+        // Fetch user data and repositories in parallel
+        const [userData, repos] = await Promise.all([
+            fetchGitHubUser(),
+            fetchGitHubRepos()
+        ]);
+
+        if (!userData || !repos) {
+            throw new Error('Failed to fetch GitHub data');
+        }
+
+        // Calculate stats
+        const stats = {
+            publicRepos: userData.public_repos || repos.length,
+            totalStars: repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0),
+            languages: new Set(repos.map(repo => repo.language).filter(lang => lang !== null)).size,
+            commits: 0 // We'll calculate this differently as it requires more API calls
+        };
+
+        // For commits, we'll use a simpler approach or estimate
+        // Getting exact commit count would require many API calls per repo
+        const currentYear = new Date().getFullYear();
+        const estimatedCommits = repos.filter(repo => {
+            const updatedYear = new Date(repo.updated_at).getFullYear();
+            return updatedYear === currentYear;
+        }).length * 10; // Rough estimate: 10 commits per updated repo this year
+
+        stats.commits = estimatedCommits;
+
+        return stats;
+    } catch (error) {
+        console.error('Error calculating GitHub stats:', error);
+        // Return fallback stats
+        return {
+            publicRepos: 0,
+            totalStars: 0,
+            languages: 0,
+            commits: 0
+        };
+    }
+}
+
+// Update stats display
+function updateStatDisplay(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        const spinner = element.querySelector('.loading-spinner');
+        if (spinner) {
+            spinner.remove();
+        }
+        element.classList.add('loaded');
+        element.setAttribute('data-count', value);
+        element.textContent = '0'; // Start from 0 for animation
+    }
+}
+
+// Load and display GitHub stats
+async function loadGitHubStats() {
+    try {
+        const stats = await fetchGitHubStats();
+        
+        // Update each stat
+        updateStatDisplay('repos-count', stats.publicRepos);
+        updateStatDisplay('stars-count', stats.totalStars);
+        updateStatDisplay('commits-count', stats.commits);
+        updateStatDisplay('languages-count', stats.languages);
+
+        // Trigger animation after data is loaded
+        setTimeout(() => {
+            animateStats();
+        }, 100);
+
+    } catch (error) {
+        console.error('Error loading GitHub stats:', error);
+        
+        // Show error state or fallback values
+        updateStatDisplay('repos-count', 0);
+        updateStatDisplay('stars-count', 0);
+        updateStatDisplay('commits-count', 0);
+        updateStatDisplay('languages-count', 0);
+    }
+}
+
+// Initialize GitHub stats when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadGitHubStats();
+});
